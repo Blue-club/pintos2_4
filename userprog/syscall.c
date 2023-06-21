@@ -68,60 +68,71 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
-	int sys_number = f->R.rax;
-	int address = f->rsp;
 
-	validate_address(address);
+	int systemcall_num = f->R.rax;
+	// printf("%d\n", systemcall_num);
 
-	// rdi -> rsi -> rdx -> r10 -> r8 -> r9
-	/**
-	 * 레지스터는 들어온 순서만을 의미한다. 
-	*/
-	switch (sys_number)	{
-		case SYS_HALT:
-			halt();
-			break;
-		case SYS_EXIT:
-			exit(f->R.rdi);
-			break;
-		case SYS_CREATE:
-			f->R.rax = create(f->R.rdi, f->R.rsi);
-			break;
-		case SYS_REMOVE:
-			f->R.rax = remove(f->R.rdi);
-			break;
-		case SYS_OPEN:
-			f->R.rax = open(f->R.rdi);
-			break;
-		case SYS_FILESIZE:
-			f->R.rax = filesize(f->R.rdi);
-			break;
-		case SYS_READ:
-			f->R.rax = read(f->R.rdi, f->R.rsi, f->R.rdx);
-			break;
-		case SYS_WRITE:
-			f->R.rax = write(f->R.rdi, f->R.rsi, f->R.rdx);
-			break;
-		case SYS_SEEK:
-			seek(f->R.rdi, f->R.rsi);
-			break;
-		case SYS_TELL:
-			f->R.rax = tell(f->R.rdi);
-			break;
-		case SYS_CLOSE:
-			close(f->R.rdi);
-			break;
-		default:
-			break;
+	switch (systemcall_num)
+	{
+	case SYS_HALT:
+		halt();
+		break;
+	case SYS_EXIT:
+		exit(f->R.rdi);
+		break;
+	case SYS_FORK:
+		f->R.rax = fork(f->R.rdi, f);
+		break;
+	case SYS_EXEC:
+		f->R.rax = exec(f->R.rdi);
+		break;
+	case SYS_WAIT:
+		f->R.rax = wait(f->R.rdi);
+		break;
+	case SYS_CREATE:
+		f->R.rax = create(f->R.rdi, f->R.rsi);
+		break;
+	case SYS_REMOVE:
+		f->R.rax = remove(f->R.rdi);
+		break;
+	case SYS_OPEN:
+		f->R.rax = open(f->R.rdi);
+		break;
+	case SYS_FILESIZE:
+		f->R.rax = filesize(f->R.rdi);
+		break;
+	case SYS_READ:
+		f->R.rax = read(f->R.rdi, f->R.rsi, f->R.rdx);
+		break;
+	case SYS_WRITE:
+		f->R.rax = write(f->R.rdi, f->R.rsi, f->R.rdx);
+		break;
+	case SYS_SEEK:
+		seek(f->R.rdi, f->R.rsi);
+		break;
+	case SYS_TELL:
+		f->R.rax = tell(f->R.rdi);
+		break;
+	case SYS_CLOSE:
+		close(f->R.rdi);
+
 	}
 	// printf("syscall Number: %d\n", sys_number);
 	// printf ("system call!\n");
 	// thread_exit ();
 }
 
-void
-halt (void) {
-	power_off();
+void check_address(void *addr){
+	if (addr == NULL)
+		exit(-1);
+	if (!is_user_vaddr(addr))
+		exit(-1);
+	// if (pml4_get_page(thread_current()->pml4, addr) == NULL)
+	// 	exit(-1);
+	// if (addr == NULL || !(is_user_vaddr(addr))||pml4_get_page(cur->pml4, addr) == NULL){
+	// 	exit(-1);
+	// }
+
 }
 
 void
